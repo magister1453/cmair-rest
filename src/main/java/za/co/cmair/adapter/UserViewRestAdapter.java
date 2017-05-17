@@ -1,13 +1,13 @@
 package za.co.cmair.adapter;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import za.co.cmair.core.domain.UserView;
-
-import java.util.List;
 
 /**
  * Created by marc.marais on 2017/05/10.
  */
 public interface UserViewRestAdapter {
-    public ResponseEntity<List<UserView>> userViews();
+    public Resources<Resource<UserView>> getUserViews();
+    public Resource<UserView> getUserView(int id);
 }
