@@ -9,5 +9,5 @@ import za.co.cmair.core.domain.UserView;
  */
 public interface UserViewRestAdapter {
     public Resources<Resource<UserView>> getUserViews();
-    public Resource<UserView> getUserView(int id);
+    public Resource<UserView> getUserView(long id);
 }

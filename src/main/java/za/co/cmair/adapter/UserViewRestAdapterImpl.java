@@ -1,12 +1,9 @@
 package za.co.cmair.adapter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,8 +21,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Created by marc.marais on 2017/05/10.
  */
 @RestController
-@ExposesResourceFor(UserView.class)
-@RequestMapping("/userView")
+@RequestMapping(value = "/api/uservew", produces = "application/hal+json")
 public class UserViewRestAdapterImpl implements UserViewRestAdapter {
     private final UserViewRepository userViewRepository;
 
@@ -37,23 +33,24 @@ public class UserViewRestAdapterImpl implements UserViewRestAdapter {
 
     @RequestMapping(method = RequestMethod.GET)
     public Resources<Resource<UserView>> getUserViews() {
-        List<UserView> userViewList = userViewRepository.findAll();
-        Link selfLink = linkTo(methodOn(UserViewRestAdapter.class).userViews()).withSelfRel();
-        List<Resource<UserView>> resourceList = userViewList.stream().map(userView -> customerToResource(customer)).collect(Collectors.toList());
-        return new ResponseEntity<List<UserView>>(userViewList, HttpStatus.OK);
+        return userViewToResource(userViewRepository.findAll());
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public Resource<UserView> getUserView(@PathVariable int id) {
+    public Resource<UserView> getUserView(@PathVariable long id) {
+        return userViewToResource(userViewRepository.findOne(id));
+    }
 
-        return customerToResource(userViewRepository.getCustomer(id));
+    private Resources<Resource<UserView>> userViewToResource(List<UserView> userViews) {
+        Link selfLink = linkTo(methodOn(UserViewRestAdapterImpl.class).getUserViews()).withSelfRel();
+        List<Resource<UserView>> customerViewResources = userViews.stream().map(this::userViewToResource).collect(Collectors.toList());
+        return new Resources<>(customerViewResources, selfLink);
 
     }
 
     private Resource<UserView> userViewToResource(UserView userView) {
-        Link selfLink = linkTo(methodOn(UserViewRestAdapterImpl.class).getCustomer(customer.getId())).withSelfRel();
-
-        return new Resource&lt;&gt;(customer, selfLink, invoiceLink, allInvoiceLink);
+        Link selfLink = linkTo(methodOn(UserViewRestAdapterImpl.class).getUserView(userView.getUserViewid())).withSelfRel();
+        return new Resource<>(userView, selfLink);
 
     }
 }
